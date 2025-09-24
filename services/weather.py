@@ -6,7 +6,7 @@ from config import Config
 API_KEY = Config.WEATHER_API
 BASE_URL = "https://api.openweathermap.org/data/2.5/weather"
 
-async def get_weather(city="Chicago"):
+async def get_weather(city):
     params = {
         "q": city,
         "appid": API_KEY,

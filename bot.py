@@ -4,7 +4,7 @@ import logging
 from aiogram import Bot, Dispatcher
 
 from config import Config
-from handlers import start, get_news
+from handlers import start, news, weather
 
 logging.basicConfig(
     level=logging.INFO,
@@ -16,7 +16,8 @@ async def main():
     dp = Dispatcher()
 
     dp.include_router(start.router)
-    dp.include_router(get_news.router)
+    dp.include_router(news.router)
+    dp.include_router(weather.router)
 
     try:
         await dp.start_polling(bot)
