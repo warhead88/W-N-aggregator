@@ -30,5 +30,5 @@ async def get_forecast(city):
 
     async with aiohttp.ClientSession() as session:
         async with session.get(FORECAST_URL, params=params) as resp:
-            data = awaut resp.json()
+            data = await resp.json()
             return data
