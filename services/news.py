@@ -4,11 +4,11 @@ import asyncio
 from config import Config
 
 API_KEY = Config.NEWS_API
-BASE_URL = "https://newsapi.org/v2/everything"
+BASE_URL = "https://gnews.io/api/v4/top-headlines"
 
 async def get_news(sources=None, country=None, category=None, query=None, language=None):
     params = {
-        "apiKey": API_KEY,
+        "apikey": API_KEY,
     }
     if sources:
         params["sources"] = sources
