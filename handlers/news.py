@@ -34,7 +34,12 @@ async def process_count(message: types.Message, state: FSMContext):
 
     count = min(count, 10)
 
-    articles = await news.get_news(query=query)
+    articles = await news.get_news(query=query, country="ru")
+    
+    if not articles:
+        await message.answer("Новости по заданной теме не найдены.")
+        await state.clear()
+        return
 
     text = ""
     for article in articles[:count]:
