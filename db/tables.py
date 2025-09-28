@@ -7,5 +7,5 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
-    city = Columh(String)
+    city = Column(String)
     news_words = Column(String)

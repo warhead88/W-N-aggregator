@@ -6,12 +6,17 @@ from aiogram import Bot, Dispatcher
 from config import Config
 from handlers import start, help, news, weather, forecast
 
+from db.db import init_db
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
 )
 
 async def main():
+
+    await init_db()
+
     bot = Bot(token=Config.BOT_TOKEN)
     dp = Dispatcher()
 

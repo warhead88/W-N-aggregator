@@ -2,9 +2,9 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sess
 from sqlalchemy.orm import declarative_base
 from contextlib import asynccontextmanager
 
-from tables import Base
+from db.tables import Base
 
-DSATABASE_URL = "sqlite+aiosqlite:///./main.db"
+DATABASE_URL = "sqlite+aiosqlite:///./main.db"
 
 engine = create_async_engine(
     DATABASE_URL,
