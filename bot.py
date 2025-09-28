@@ -4,9 +4,8 @@ import logging
 from aiogram import Bot, Dispatcher
 
 from config import Config
-from handlers import start, help, news, weather, forecast
-
 from db.db import init_db
+from handlers import start, help, news, weather, forecast
 
 logging.basicConfig(
     level=logging.INFO,
@@ -14,7 +13,6 @@ logging.basicConfig(
 )
 
 async def main():
-
     await init_db()
 
     bot = Bot(token=Config.BOT_TOKEN)

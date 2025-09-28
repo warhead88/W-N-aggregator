@@ -23,10 +23,11 @@ async def init_db():
         await conn.run_sync(Base.metadata.create_all)
 
 @asynccontextmanager
-async def get_async_sesion():
-    try:
-        yield session
-        await session.commit()
-    except:
-        await session.rollback()
-        raise
+async def get_async_session():
+    async with SessionLocal() as session:
+        try:
+            yield session
+            await session.commit()
+        except:
+            await session.rollback()
+            raise
