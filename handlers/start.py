@@ -5,4 +5,4 @@ router = Router()
 
 @router.message(Command("start"))
 async def start(message: types.Message):
-    await message.answer("""Привет! Напиши команду /get, а после следуй инструкциям.""")
+    await message.answer("""Привет! Это бот-аггрегатор новостей и погоды. Здесь ты можешь получать последнюю информацию. Напиши /help для дополнительной информации.""")
