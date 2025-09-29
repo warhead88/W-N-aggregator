@@ -114,16 +114,19 @@ async def procces_news_count(message: types.Message, state: FSMContext):
 async def change_place(callback: types.CallbackQuery, state: FSMContext):
     await state.set_state(Weather.waiting_for_text)
     await callback.message.answer("Введите место для рассылки погоды (город или страну):")
+    await callback.answer()
 
 @router.callback_query(F.data == "news")
 async def change_query(callback: types.CallbackQuery, state: FSMContext):
     await state.set_state(News.waiting_for_text)
     await callback.message.answer("Введите ключевые слова для рассылки новостей:")
+    await callback.answer()
 
 @router.callback_query(F.data == "cnt")
 async def change_count(callback: types.CallbackQuery, state: FSMContext):
     await state.set_state(Count.waiting_for_text)
     await callback.message.answer("Введите количество новостей в подборке (до 10):")
+    await callback.answer()
 
 @router.callback_query(F.data == "sub")
 async def change_sub(callback: types.CallbackQuery):
