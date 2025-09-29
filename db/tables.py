@@ -9,3 +9,4 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     city = Column(String)
     news_words = Column(String)
+    count = Column(Integer)
