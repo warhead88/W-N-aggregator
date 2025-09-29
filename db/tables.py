@@ -7,6 +7,6 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
-    city = Column(String)
-    news_words = Column(String)
+    place = Column(String)
+    query = Column(String)
     count = Column(Integer)
