@@ -5,7 +5,7 @@ from aiogram import Bot, Dispatcher
 
 from config import Config
 from db.db import init_db
-from handlers import start, help, news, weather, forecast
+from handlers import start, help, menu, news, weather, forecast
 
 logging.basicConfig(
     level=logging.INFO,
@@ -20,6 +20,7 @@ async def main():
 
     dp.include_router(start.router)
     dp.include_router(help.router)
+    dp.include_router(menu.router)
     dp.include_router(news.router)
     dp.include_router(weather.router)
     dp.include_router(forecast.router)
