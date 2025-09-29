@@ -5,5 +5,6 @@ def main_menu():
     kb.button(text="Изменить место", callback_data="weather")
     kb.button(text="Изменить слова", callback_data="news")
     kb.button(text="Изменить количество", callback_data="cnt")
-    kb.adjust(1)
+    kb.button(text="Изменить статус подписки", callback_data="sub")
+    kb.adjust(2, 1, 1)
     return kb.as_markup()

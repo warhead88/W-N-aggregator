@@ -2,6 +2,9 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sess
 from sqlalchemy.orm import declarative_base
 from contextlib import asynccontextmanager
 
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
+
 from db.tables import Base
 
 DATABASE_URL = "sqlite+aiosqlite:///./main.db"
@@ -16,6 +19,12 @@ SessionLocal = async_sessionmaker(
     bind=engine,
     expire_on_commit=False,
     class_=AsyncSession,
+)
+
+scheduler = AsyncIOScheduler(
+    jobstores={
+        "default": SQLAlchemyJobStore(url="sqlite+aiosqlite:///jobs.sqlite")
+    }
 )
 
 async def init_db():

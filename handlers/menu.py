@@ -4,7 +4,7 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 
-from sqlalchemy import select, update
+from sqlalchemy import select
 
 from db.db import get_async_session
 from db.tables import User
@@ -43,6 +43,11 @@ async def open_menu(message: types.Message):
             count = "Количество не задано"
         else:
             count = user.count
+        
+        if user.is_subscribed == True:
+            is_subscribed = "Активна"
+        else:
+            is_subscribed = "Неактивна"
 
         await message.answer(f"""Это меню, где вы сможете увидеть и изменить свои параметры поиска, погоды и статус подписки.
 
@@ -50,7 +55,9 @@ async def open_menu(message: types.Message):
 
 Ключевые слова для ежедневной подборки новостей: {query};
 
-Количество новостей в ежедневной подборке: {count}.""", reply_markup=main_menu())
+Количество новостей в ежедневной подборке: {count};
+
+Статус подписки: {is_subscribed}.""", reply_markup=main_menu())
 
 @router.message(Weather.waiting_for_text)
 async def process_weather_place(message: types.Message, state: FSMContext):
@@ -117,3 +124,19 @@ async def change_query(callback: types.CallbackQuery, state: FSMContext):
 async def change_count(callback: types.CallbackQuery, state: FSMContext):
     await state.set_state(Count.waiting_for_text)
     await callback.message.answer("Введите количество новостей в подборке (до 10):")
+
+@router.callback_query(F.data == "sub")
+async def change_sub(callback: types.CallbackQuery):
+    async with get_async_session() as session:
+        result = await session.execute(select(User).where(User.id == callback.from_user.id))
+        user = result.scalar_one_or_none()
+
+        print(callback.message.from_user.id)
+
+        if user.is_subscribed != True:
+            user.is_subscribed = True
+            await callback.message.answer("Вы успешно подписались на ежедневную рассылку!")
+        else:
+            user.is_subscribed = False
+            await callback.message.answer("Вы успешно отписались от ежедневной рассылки!")
+    await callback.answer()
