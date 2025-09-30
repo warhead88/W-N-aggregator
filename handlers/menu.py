@@ -1,3 +1,5 @@
+from zoneinfo import ZoneInfo
+
 from aiogram import Router, types, F
 from aiogram.filters import Command
 
@@ -20,6 +22,16 @@ class News(StatesGroup):
 
 class Count(StatesGroup):
     waiting_for_text = State()
+
+class Timezone(StatesGroup):
+    waiting_for_text = State()
+
+def validate_timezone(tz_str: str) -> bool:
+    try:
+        _ = ZoneInfo(tz_str)
+        return True
+    except Exception:
+        return False
 
 @router.message(Command("menu"))
 async def open_menu(message: types.Message):
@@ -49,6 +61,11 @@ async def open_menu(message: types.Message):
         else:
             is_subscribed = "Неактивна"
 
+        if not user.timezone:
+            timezone = "Часовой пояс не задан."
+        else:
+            timezone = user.timezone
+
         await message.answer(f"""Это меню, где вы сможете увидеть и изменить свои параметры поиска, погоды и статус подписки.
 
 Место, выбранное для ежедневной рассылки погоды: {place};
@@ -56,6 +73,8 @@ async def open_menu(message: types.Message):
 Ключевые слова для ежедневной подборки новостей: {query};
 
 Количество новостей в ежедневной подборке: {count};
+
+Часовой пояс: {timezone};
 
 Статус подписки: {is_subscribed}.""", reply_markup=main_menu())
 
@@ -88,7 +107,7 @@ async def process_news_query(message: types.Message, state: FSMContext):
     await state.clear()
 
 @router.message(Count.waiting_for_text)
-async def procces_news_count(message: types.Message, state: FSMContext):
+async def process_news_count(message: types.Message, state: FSMContext):
     async with get_async_session() as session:
         try:
             count = int(message.text)
@@ -110,6 +129,25 @@ async def procces_news_count(message: types.Message, state: FSMContext):
 
     await state.clear()
 
+@router.message(Timezone.waiting_for_text)
+async def process_timezone(message: types.Message, state: FSMContext):
+    timezone = message.text
+
+    if validate_timezone(timezone) == True:
+        async with get_async_session() as session:
+            result = await session.execute(
+                select(User).where(User.id == message.from_user.id)
+            )
+            user = result.scalar_one_or_none()
+    
+            user.timezone = timezone
+    
+            await message.answer(f"Вы успешно установили свой часовой пояс: {timezone}!")
+    else:
+        await message.answer("Введён неверный часовой пояс.")
+
+    await state.clear()
+
 @router.callback_query(F.data == "weather")
 async def change_place(callback: types.CallbackQuery, state: FSMContext):
     await state.set_state(Weather.waiting_for_text)
@@ -128,17 +166,27 @@ async def change_count(callback: types.CallbackQuery, state: FSMContext):
     await callback.message.answer("Введите количество новостей в подборке (до 10):")
     await callback.answer()
 
+@router.callback_query(F.data == "timezone")
+async def change_timezone(callback: types.CallbackQuery, state: FSMContext):
+    await state.set_state(Timezone.waiting_for_text)
+    await callback.message.answer("Введите свой часовой пояс в формате 'Europe/Moscow' (IASA-формат):")
+    await callback.answer()
+
+
 @router.callback_query(F.data == "sub")
-async def change_sub(callback: types.CallbackQuery):
+async def change_sub(callback: types.CallbackQuery, state: FSMContext):
     async with get_async_session() as session:
         result = await session.execute(select(User).where(User.id == callback.from_user.id))
         user = result.scalar_one_or_none()
 
-        print(callback.message.from_user.id)
-
         if user.is_subscribed != True:
             user.is_subscribed = True
-            await callback.message.answer("Вы успешно подписались на ежедневную рассылку!")
+
+            if user.timezone == None:
+                await callback.message.answer("Вам нужно указать свой часовой пояс, чтобы подписаться.")    
+            else:
+                await callback.message.answer("Вы успешно подписались не ежедневную рассылку!")
+
         else:
             user.is_subscribed = False
             await callback.message.answer("Вы успешно отписались от ежедневной рассылки!")

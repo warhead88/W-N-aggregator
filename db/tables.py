@@ -11,3 +11,4 @@ class User(Base):
     query = Column(String)
     count = Column(Integer)
     is_subscribed = Column(Boolean, default=False, nullable=False)
+    timezone = Column(String)
