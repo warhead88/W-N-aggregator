@@ -17,10 +17,13 @@ async def get_forecast(message: types.Message):
         await message.answer("Введите команду в корректной форме.")
         return
     
+    import html
+    safe_city = html.escape(city)
+    
     try:
         data = await weather.get_forecast(city)
     except Exception as e:
-        await message.answer(f"Не удалось получить прогноз для {city}.")
+        await message.answer(f"Не удалось получить прогноз для <b>{safe_city}</b>.", parse_mode="HTML")
         return
 
     forecast_by_day = defaultdict(lambda: {"temps": [], "descriptions": []})

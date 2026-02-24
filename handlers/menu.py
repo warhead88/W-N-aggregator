@@ -45,23 +45,24 @@ async def open_menu(message: types.Message):
             await message.answer("Сначала напишите /start для регистрации.")
             return
 
-        place = user.place if user.place else "Место не задано"
-        query = user.query if user.query else "Слова не заданы"
+        import html
+        place = html.escape(user.place) if user.place else "Место не задано"
+        query = html.escape(user.query) if user.query else "Слова не заданы"
         count = user.count if user.count else "Количество не задано"
         is_subscribed = "Активна" if user.is_subscribed else "Неактивна"
-        timezone = user.timezone if user.timezone else "Часовой пояс не задан."
+        timezone = html.escape(user.timezone) if user.timezone else "Часовой пояс не задан."
 
-        await message.answer(f"""Это меню, где вы сможете увидеть и изменить свои параметры поиска, погоды и статус подписки.
+        await message.answer(f"""<b>Настройки</b>
 
-Место, выбранное для ежедневной рассылки погоды: {place};
+Место, выбранное для ежедневной рассылки погоды: <b>{place}</b>
 
-Ключевые слова для ежедневной подборки новостей: {query};
+Ключевые слова для ежедневной подборки новостей: <b>{query}</b>
 
-Количество новостей в ежедневной подборке: {count};
+Количество новостей в ежедневной подборке: <b>{count}</b>
 
-Часовой пояс: {timezone};
+Часовой пояс: <b>{timezone}</b>
 
-Статус подписки: {is_subscribed}.""", reply_markup=main_menu())
+Статус подписки: <b>{is_subscribed}</b>""", reply_markup=main_menu(), parse_mode="HTML")
 
 @router.message(Weather.waiting_for_text)
 async def process_weather_place(message: types.Message, state: FSMContext):

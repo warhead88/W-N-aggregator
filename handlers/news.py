@@ -26,25 +26,33 @@ async def process_query(message: types.Message, state: FSMContext):
 @router.message(Form.waiting_for_count)
 async def process_count(message: types.Message, state: FSMContext):
     data = await state.get_data()
+    import html
     query = data.get("query")
+    safe_query = html.escape(query)
+
     try:
         count = int(message.text)
     except ValueError:
         count = 5  # если пользователь ввёл не число, пусть будет дефолт
 
-    count = min(count, 10)
+    count = max(1, min(count, 10))
 
-    articles = await news.get_news(query=query, country="ru")
+    try:
+        articles = await news.get_news(query=query, country="ru")
+    except Exception as e:
+        await message.answer("Произошла ошибка при получении новостей. Попробуйте позже.")
+        await state.clear()
+        return
     
     if not articles:
-        await message.answer("Новости по заданной теме не найдены.")
+        await message.answer(f"Новости по теме <b>{safe_query}</b> не найдены.", parse_mode="HTML")
         await state.clear()
         return
 
-    text = ""
+    text = f"<b>🔎 Результаты поиска по запросу: {safe_query}</b>\n\n"
     for article in articles[:count]:
-        title = article.get("title", "Без названия")
-        description = article.get("description", "Нет описания")
+        title = html.escape(article.get("title", "Без названия"))
+        description = html.escape(article.get("description", "Нет описания"))
         link = article.get("url", "#")
 
         text += f"<b>{title}</b>\n{description}\n<i>{link}</i>\n\n"

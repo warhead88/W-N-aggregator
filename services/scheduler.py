@@ -53,17 +53,20 @@ async def check_and_send(bot: Bot):
                 daily_cache[cache_key] = True
                 
                 text_parts = ["<b>🌟 Ваш ежедневный дайджест:</b>\n"]
+                
+                import html
 
                 if place:
+                    safe_place = html.escape(place)
                     try:
                         weather_data = await get_weather(place)
-                        name = weather_data.get("name", place)
-                        weather_desc = weather_data.get("weather", [{}])[0].get("description", "Нет данных")
+                        name = html.escape(weather_data.get("name", place))
+                        weather_desc = html.escape(weather_data.get("weather", [{}])[0].get("description", "Нет данных"))
                         temp = weather_data.get("main", {}).get("temp", "N/A")
                         text_parts.append(f"<b>Погода в {name}</b>: {weather_desc}, 🌡 {temp} °C\n")
                     except Exception as e:
                         print(f"Error fetching weather for user {user.id} ({place}): {e}")
-                        text_parts.append(f"<b>Погода в {place}</b>: Недоступна в данный момент.\n")
+                        text_parts.append(f"<b>Погода в {safe_place}</b>: Недоступна в данный момент.\n")
                 
                 text_parts.append("\n<b>📰 Новости:</b>\n")
 
@@ -77,8 +80,8 @@ async def check_and_send(bot: Bot):
                     text_parts.append("Новости по вашей теме сегодня не найдены.")
                 else:
                     for article in articles[:count]:
-                        title = article.get("title", "Без названия")
-                        description = article.get("description", "Нет описания")
+                        title = html.escape(article.get("title", "Без названия"))
+                        description = html.escape(article.get("description", "Нет описания"))
                         link = article.get("url", "#")
                         text_parts.append(f"<b>{title}</b>\n{description}\n<i>{link}</i>\n\n")
 

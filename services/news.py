@@ -1,5 +1,4 @@
 import aiohttp
-import asyncio
 
 from config import Config
 
@@ -27,14 +26,4 @@ async def get_news(sources=None, country=None, category=None, query=None, langua
             data = await resp.json()
             return data.get("articles", [])
 
-async def main():
-    articles = await get_news(query="Ukraine")
-    for article in articles:
-        title = article["title"]
-        description = article["description"]
-        link = article["url"]
 
-        print(f"title: {title}\ndescription: {description}\nurl: {link}\n\n")
-
-if __name__ == "__main__":
-    asyncio.run(main())

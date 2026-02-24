@@ -15,13 +15,16 @@ async def get_weather(message: types.Message):
     else:
         await message.answer("Введите команду в корректной форме.")
         return
+    import html
+    safe_city = html.escape(city)
+
     try:
         data = await weather.get_weather(city)
     except Exception as e:
-        await message.answer(f"Не удалось получить погоду для {city}. Проверьте правильность названия города.")
+        await message.answer(f"Не удалось получить погоду для <b>{safe_city}</b>. Проверьте правильность названия города.", parse_mode="HTML")
         return
 
-    name = data.get("name", city)
+    name = html.escape(data.get("name", city))
     weather_desc = data.get("weather", [{}])[0].get("description", "Нет данных")
     main = data.get("main", {})
     temp = main.get("temp", "N/A")
