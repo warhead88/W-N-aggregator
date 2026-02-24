@@ -5,3 +5,10 @@ asyncpg
 APScheduler
 python-dotenv
 alembic
+
+[dev]
+pytest
+pytest-asyncio
+pytest-mock
+coverage
+aiogram-tests

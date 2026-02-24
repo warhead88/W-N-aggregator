@@ -5,9 +5,9 @@ WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-COPY requirements.txt .
+COPY pyproject.toml .
 
-ENV PYTHONPATH=/app/src
+RUN pip install --no-cache-dir .
 
 COPY . .
 

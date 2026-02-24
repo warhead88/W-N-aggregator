@@ -45,14 +45,13 @@ async def open_menu(message: types.Message, session: AsyncSession):
     if user is None:
         await message.answer("Сначала напишите /start для регистрации.")
         return
-        
-    place = html.escape(user.place) if user.place else "Место не задано"
-    query = html.escape(user.query) if user.query else "Слова не заданы"
-    count = user.count if user.count else "Количество не задано"
-    is_subscribed = "Активна" if user.is_subscribed else "Неактивна"
-    timezone = html.escape(user.timezone) if user.timezone else "Часовой пояс не задан."
+        place = html.escape(user.place) if user.place else "Место не задано"
+        query = html.escape(user.query) if user.query else "Слова не заданы"
+        count = user.count if user.count else "Количество не задано"
+        is_subscribed = "Активна" if user.is_subscribed else "Неактивна"
+        timezone = html.escape(user.timezone) if user.timezone else "Часовой пояс не задан."
 
-    await message.answer(f"""<b>Настройки</b>
+        await message.answer(f"""<b>Настройки</b>
 
 Место, выбранное для ежедневной рассылки погоды: <b>{place}</b>
 

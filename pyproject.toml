@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "wn-aggregator"
+version = "0.1.0"
+description = "Weather and News Aggregator Telegram Bot"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "aiogram",
+    "aiohttp",
+    "SQLAlchemy",
+    "asyncpg",
+    "APScheduler",
+    "python-dotenv",
+    "alembic"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-asyncio",
+    "pytest-mock",
+    "coverage",
+    "aiogram-tests"
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
