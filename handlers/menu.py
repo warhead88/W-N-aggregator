@@ -41,30 +41,15 @@ async def open_menu(message: types.Message):
         )
         user = result.scalar_one_or_none()
 
-        if not user.place:
-            place = "Место не задано"
-        else:
-            place = user.place
+        if user is None:
+            await message.answer("Сначала напишите /start для регистрации.")
+            return
 
-        if not user.query:
-            query = "Слова не заданы"
-        else:
-            query = user.query
-
-        if not user.count:
-            count = "Количество не задано"
-        else:
-            count = user.count
-        
-        if user.is_subscribed == True:
-            is_subscribed = "Активна"
-        else:
-            is_subscribed = "Неактивна"
-
-        if not user.timezone:
-            timezone = "Часовой пояс не задан."
-        else:
-            timezone = user.timezone
+        place = user.place if user.place else "Место не задано"
+        query = user.query if user.query else "Слова не заданы"
+        count = user.count if user.count else "Количество не задано"
+        is_subscribed = "Активна" if user.is_subscribed else "Неактивна"
+        timezone = user.timezone if user.timezone else "Часовой пояс не задан."
 
         await message.answer(f"""Это меню, где вы сможете увидеть и изменить свои параметры поиска, погоды и статус подписки.
 
@@ -85,10 +70,9 @@ async def process_weather_place(message: types.Message, state: FSMContext):
 
         result = await session.execute(select(User).where(User.id == message.from_user.id))
         user = result.scalar_one_or_none()
-        
-        user.place = place
-        
-        await message.answer(f"Место: {place}; было успешно задано как ваше основное.")
+        if user:
+            user.place = place
+            await message.answer(f"Место: {place}; было успешно задано как ваше основное.")
 
     await state.clear()
 
@@ -99,10 +83,9 @@ async def process_news_query(message: types.Message, state: FSMContext):
 
         result = await session.execute(select(User).where(User.id == message.from_user.id))
         user = result.scalar_one_or_none()
-
-        user.query = query
-
-        await message.answer(f"Ключевые слова для поиска: {query}; были успешно заданы.")
+        if user:
+            user.query = query
+            await message.answer(f"Ключевые слова для поиска: {query}; были успешно заданы.")
 
     await state.clear()
 
@@ -111,21 +94,20 @@ async def process_news_count(message: types.Message, state: FSMContext):
     async with get_async_session() as session:
         try:
             count = int(message.text)
-            if count > 10:
-                await message.answer("Введите не более 10 новостей.")
+            if count <= 0 or count > 10:
+                await message.answer("Введите число от 1 до 10.")
                 await state.clear()
                 return
-        except:
+        except Exception:
             await message.answer("Введите числовое значение.")
             await state.clear()
             return
-        
+
         result = await session.execute(select(User).where(User.id == message.from_user.id))
         user = result.scalar_one_or_none()
-
-        user.count = count
-
-        await message.answer(f"Количество новостей в подборке: {count}; было успешно задано.")
+        if user:
+            user.count = count
+            await message.answer(f"Количество новостей в подборке: {count}; было успешно задано.")
 
     await state.clear()
 
@@ -133,16 +115,15 @@ async def process_news_count(message: types.Message, state: FSMContext):
 async def process_timezone(message: types.Message, state: FSMContext):
     timezone = message.text
 
-    if validate_timezone(timezone) == True:
+    if validate_timezone(timezone):
         async with get_async_session() as session:
             result = await session.execute(
                 select(User).where(User.id == message.from_user.id)
             )
             user = result.scalar_one_or_none()
-    
-            user.timezone = timezone
-    
-            await message.answer(f"Вы успешно установили свой часовой пояс: {timezone}!")
+            if user:
+                user.timezone = timezone
+                await message.answer(f"Вы успешно установили свой часовой пояс: {timezone}!")
     else:
         await message.answer("Введён неверный часовой пояс.")
 
@@ -178,15 +159,16 @@ async def change_sub(callback: types.CallbackQuery, state: FSMContext):
     async with get_async_session() as session:
         result = await session.execute(select(User).where(User.id == callback.from_user.id))
         user = result.scalar_one_or_none()
+        if not user:
+            await callback.answer("Пользователь не найден. Введите /start!", show_alert=True)
+            return
 
-        if user.is_subscribed != True:
-            user.is_subscribed = True
-
-            if user.timezone == None:
-                await callback.message.answer("Вам нужно указать свой часовой пояс, чтобы подписаться.")    
+        if not user.is_subscribed:
+            if user.timezone is None:
+                await callback.message.answer("Вам нужно указать свой часовой пояс, чтобы подписаться.")
             else:
-                await callback.message.answer("Вы успешно подписались не ежедневную рассылку!")
-
+                user.is_subscribed = True
+                await callback.message.answer("Вы успешно подписались на ежедневную рассылку!")
         else:
             user.is_subscribed = False
             await callback.message.answer("Вы успешно отписались от ежедневной рассылки!")

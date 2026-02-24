@@ -1,34 +1,25 @@
 import aiohttp
-import asyncio
 
 from config import Config
 
 API_KEY = Config.WEATHER_API
-WEATHER_URL = "https://api.openweathermap.org/data/2.5/weather"
-FORECAST_URL = "http://api.openweathermap.org/data/2.5/forecast"
+BASE_URL = "https://api.openweathermap.org/data/2.5"
 
-async def get_weather(city):
+async def _fetch_weather_data(endpoint: str, city: str):
     params = {
         "q": city,
         "appid": API_KEY,
         "units": "metric",
         "lang": "ru"
     }
-
+    
     async with aiohttp.ClientSession() as session:
-        async with session.get(WEATHER_URL, params=params) as resp:
-            data = await resp.json()
-            return data
+        async with session.get(f"{BASE_URL}/{endpoint}", params=params) as resp:
+            resp.raise_for_status()
+            return await resp.json()
 
-async def get_forecast(city):
-    params = {
-        "q": city,
-        "appid": API_KEY,
-        "units": "metric",
-        "lang": "ru"
-    }
+async def get_weather(city: str):
+    return await _fetch_weather_data("weather", city)
 
-    async with aiohttp.ClientSession() as session:
-        async with session.get(FORECAST_URL, params=params) as resp:
-            data = await resp.json()
-            return data
+async def get_forecast(city: str):
+    return await _fetch_weather_data("forecast", city)

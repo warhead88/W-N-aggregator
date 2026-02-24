@@ -23,6 +23,7 @@ async def get_news(sources=None, country=None, category=None, query=None, langua
 
     async with aiohttp.ClientSession() as session:
         async with session.get(BASE_URL, params=params) as resp:
+            resp.raise_for_status()
             data = await resp.json()
             return data.get("articles", [])
 

@@ -15,33 +15,39 @@ async def get_weather(message: types.Message):
     else:
         await message.answer("Введите команду в корректной форме.")
         return
-    data = await weather.get_weather(city)
+    try:
+        data = await weather.get_weather(city)
+    except Exception as e:
+        await message.answer(f"Не удалось получить погоду для {city}. Проверьте правильность названия города.")
+        return
 
-    name = data["name"]
-    desc = data["weather"][0]["description"]
-    temp = data["main"]["temp"]
-    feels = data["main"]["feels_like"]
-    t_min = data["main"]["temp_min"]
-    t_max = data["main"]["temp_max"]
-    humidity = data["main"]["humidity"]
-    pressure = data["main"]["pressure"]
+    name = data.get("name", city)
+    weather_desc = data.get("weather", [{}])[0].get("description", "Нет данных")
+    main = data.get("main", {})
+    temp = main.get("temp", "N/A")
+    feels = main.get("feels_like", "N/A")
+    t_min = main.get("temp_min", "N/A")
+    t_max = main.get("temp_max", "N/A")
+    humidity = main.get("humidity", "N/A")
+    pressure = main.get("pressure", "N/A")
+    wind = data.get("wind", {})
+    wind_speed = wind.get("speed", "N/A")
+    wind_deg = wind.get("deg", "N/A")
+    gust = wind.get("gust", 0)
+    clouds = data.get("clouds", {}).get("all", "N/A")
+    vis = data.get("visibility", 0)
 
-    wind_speed = data["wind"]["speed"]
-    wind_deg = data["wind"]["deg"]
-    gust = data["wind"].get("gust", 0)
-
-    clouds = data["clouds"]["all"]
-    
-    if data["visibility"] < 1000:
-        visibility = str(data["visibility"]) + " метров"
+    if vis < 1000:
+        visibility = f"{vis} метров"
     else:
-        visibility = str(data["visibility"] / 1000) + " километров"
+        visibility = f"{vis / 1000} километров"
 
-    sunrise = datetime.fromtimestamp(data["sys"]["sunrise"]).strftime("%H:%M")
-    sunset = datetime.fromtimestamp(data["sys"]["sunset"]).strftime("%H:%M")
+    sys_data = data.get("sys", {})
+    sunrise = datetime.fromtimestamp(sys_data.get("sunrise", 0)).strftime("%H:%M") if sys_data.get("sunrise") else "N/A"
+    sunset = datetime.fromtimestamp(sys_data.get("sunset", 0)).strftime("%H:%M") if sys_data.get("sunset") else "N/A"
 
     forecast = f"""🌍Город: {name},
-☀️{desc},
+☀️{weather_desc},
 🌡Температура: {temp} °C (ощущается как {feels} °C),
 🔽Мин: {t_min} °C / 🔼Макс: {t_max} °C,
 💧Влажность: {humidity} %,

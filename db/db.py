@@ -4,11 +4,13 @@ from contextlib import asynccontextmanager
 
 from db.tables import Base
 
-DATABASE_URL = "sqlite+aiosqlite:///./main.db"
+from config import Config
+
+DATABASE_URL = f"postgresql+asyncpg://{Config.POSTGRES_USER}:{Config.POSTGRES_PASSWORD}@{Config.POSTGRES_HOST}:{Config.POSTGRES_PORT}/{Config.POSTGRES_DB}"
 
 engine = create_async_engine(
     DATABASE_URL,
-    echo=True,
+    echo=False,
     future=True,
 )
 
@@ -28,6 +30,6 @@ async def get_async_session():
         try:
             yield session
             await session.commit()
-        except:
+        except Exception:
             await session.rollback()
             raise
