@@ -20,8 +20,8 @@ SessionLocal = async_sessionmaker(
 )
 
 async def init_db():
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+    pass
+    # Base.metadata.create_all is no longer used, we use Alembic migrations instead
 
 @asynccontextmanager
 async def get_async_session():

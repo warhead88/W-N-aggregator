@@ -4,3 +4,4 @@ SQLAlchemy
 asyncpg
 APScheduler
 python-dotenv
+alembic
