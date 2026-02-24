@@ -19,7 +19,7 @@ if config.config_file_name is not None:
 import os
 import sys
 # add parent dir to sys.path so we can import from project
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(__file__)), "src"))
 
 from config import Config
 from db.tables import Base

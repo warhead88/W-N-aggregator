@@ -2,6 +2,7 @@ from aiogram import Router, types
 from aiogram.filters import Command
 
 from datetime import datetime
+import html
 
 from services import weather
 
@@ -15,7 +16,6 @@ async def get_weather(message: types.Message):
     else:
         await message.answer("Введите команду в корректной форме.")
         return
-    import html
     safe_city = html.escape(city)
 
     try:

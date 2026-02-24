@@ -5,7 +5,10 @@ import asyncio
 from sqlalchemy import select
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-from aiogram import Router, Bot
+import logging
+import html
+
+from aiogram import Bot
 
 from db.db import get_async_session
 from db.tables import User
@@ -13,7 +16,7 @@ from db.tables import User
 from services.news import get_news
 from services.weather import get_weather
 
-router = Router()
+logger = logging.getLogger(__name__)
 
 sched = AsyncIOScheduler()
 
@@ -26,7 +29,7 @@ async def check_and_send(bot: Bot):
         today_str = now_utc.strftime("%Y-%m-%d")
 
         result = await session.execute(
-            select(User).where(User.is_subscribed == True)
+            select(User).where(User.is_subscribed.is_(True))
         )
         users = result.scalars().all()
 
@@ -38,7 +41,7 @@ async def check_and_send(bot: Bot):
 
             user_time = now_utc.astimezone(tz)
             
-                # Key for cache
+            # Key for cache
             cache_key = f"{user.id}_{today_str}"
 
             if datetime.time(14, 0) <= user_time.time() <= datetime.time(15, 5):
@@ -53,8 +56,6 @@ async def check_and_send(bot: Bot):
                 daily_cache[cache_key] = True
                 
                 text_parts = ["<b>🌟 Ваш ежедневный дайджест:</b>\n"]
-                
-                import html
 
                 if place:
                     safe_place = html.escape(place)
@@ -65,7 +66,7 @@ async def check_and_send(bot: Bot):
                         temp = weather_data.get("main", {}).get("temp", "N/A")
                         text_parts.append(f"<b>Погода в {name}</b>: {weather_desc}, 🌡 {temp} °C\n")
                     except Exception as e:
-                        print(f"Error fetching weather for user {user.id} ({place}): {e}")
+                        logger.error(f"Error fetching weather for user {user.id} ({place}): {e}")
                         text_parts.append(f"<b>Погода в {safe_place}</b>: Недоступна в данный момент.\n")
                 
                 text_parts.append("\n<b>📰 Новости:</b>\n")
@@ -74,7 +75,7 @@ async def check_and_send(bot: Bot):
                     articles = await get_news(query=query, country="ru")
                 except Exception as e:
                     articles = []
-                    print(f"Error fetching news for user {user.id}: {e}")
+                    logger.error(f"Error fetching news for user {user.id}: {e}")
 
                 if not articles:
                     text_parts.append("Новости по вашей теме сегодня не найдены.")

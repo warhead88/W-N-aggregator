@@ -3,6 +3,7 @@ from aiogram.filters import Command
 
 from datetime import datetime
 from collections import defaultdict
+import html
 
 from services import weather
 
@@ -17,7 +18,6 @@ async def get_forecast(message: types.Message):
         await message.answer("Введите команду в корректной форме.")
         return
     
-    import html
     safe_city = html.escape(city)
     
     try:

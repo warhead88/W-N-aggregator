@@ -3,6 +3,8 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 
+import html
+
 from services import news
 
 router = Router()
@@ -26,7 +28,6 @@ async def process_query(message: types.Message, state: FSMContext):
 @router.message(Form.waiting_for_count)
 async def process_count(message: types.Message, state: FSMContext):
     data = await state.get_data()
-    import html
     query = data.get("query")
     safe_query = html.escape(query)
 
